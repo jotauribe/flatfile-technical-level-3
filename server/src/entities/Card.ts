@@ -10,7 +10,7 @@ export class CardEntity {
   title: string
 
   @Column({ name: 'section_id' })
-  section_id: number
+  sectionId: number
 
   @ManyToOne(() => SectionEntity, (section) => section.cards)
   @JoinColumn({ name: 'section_id' })

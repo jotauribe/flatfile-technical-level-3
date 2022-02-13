@@ -11,9 +11,16 @@ export class CardsService {
   ) {}
 
   create({ sectionId, title }: { sectionId: number; title: string }): Promise<CardEntity> {
-    let card = new CardEntity()
+    const card = new CardEntity()
     card.title = title
-    card.section_id = sectionId
+    card.sectionId = sectionId
+    return this.cardsRepository.save(card)
+  }
+
+  async update({ id, sectionId, title }: { id: number, sectionId: number; title: string }): Promise<CardEntity> {
+    const card = await this.cardsRepository.findOne(id)
+    card.title = title || card.title
+    card.sectionId = sectionId || card.sectionId
     return this.cardsRepository.save(card)
   }
 }
