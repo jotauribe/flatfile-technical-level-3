@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Draggable } from 'react-beautiful-dnd'
 
 import Card from '../card'
 import SectionI from '../../types/section'
@@ -20,27 +21,46 @@ import {
 } from './styled-components'
 import CardI from '../../types/card'
 
-const Section = ({
-  section: { id, title, cards },
-  onCardSubmit
-}: {
+type SectionProps = {
   section: SectionI
   onCardSubmit: Function
+  innerRef: (element: HTMLElement | null) => any
+}
+
+const Section: React.FC<SectionProps> = ({
+  children, 
+  innerRef,
+  section: { id, title, cards },
+  onCardSubmit,
+  ...droppableProps
 }) => {
   const [isTempCardActive, setIsTempCardActive] = useState(false)
   const [cardText, setCardText] = useState('')
 
   return (
-    <Wrapper>
-      <WrappedSection>
-        <SectionHeader>
+    <Wrapper className='section-root-wrapper'>
+      <WrappedSection className='section-wrapper'>
+        <SectionHeader className='section-header'>
           <SectionTitle>{title}</SectionTitle>
         </SectionHeader>
-        <CardsContainer>
-          {cards.length &&
-            cards.map((card: CardI) => {
-              return <Card key={card.id} card={card}></Card>
+        <CardsContainer ref={innerRef} {...droppableProps} className='section-card-container'>
+          {cards?.length &&
+            cards.map((card: CardI, index: number) => {
+              return (
+                <Draggable key={card.id} index={index} draggableId={String(card.id)}>
+                  {(provided) => (
+                    <Card
+                      key={card.id}
+                      card={card}
+                      innerRef={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    ></Card>
+                  )}
+                </Draggable>
+              )
             })}
+            {children}
         </CardsContainer>
         {isTempCardActive ? (
           <CardComposerDiv>

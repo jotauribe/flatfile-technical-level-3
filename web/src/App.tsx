@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import axios from 'axios'
+import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd'
 
 import Section from './components/section'
 import SectionI from './types/section'
 
 import './App.css'
+import useSections from './hooks/useSections'
 
 export const BoardContainer = styled.div`
   background-color: rgb(49, 121, 186);
@@ -22,42 +23,34 @@ export const BoardContainer = styled.div`
 `
 
 function App() {
-  const [sections, setSections] = useState<SectionI[]>([])
+  const { sections, moveCardToSection, addNewCardToSection } = useSections()
 
-  useEffect(() => {
-    axios.get('http://localhost:3001/sections').then((response) => {
-      // Section order is determined by ID so sort by ID
-      const sortedSections = response.data.sort((a: SectionI, b: SectionI) => a.id - b.id)
-      setSections(sortedSections)
-    })
-  })
-
-  const onCardSubmit = (sectionId: number, title: string) => {
-    axios({
-      method: 'post',
-      url: 'http://localhost:3001/cards',
-      data: { sectionId, title }
-    }).then((response) => {
-      let sectionsClone: SectionI[] = [...sections]
-      for (let i = 0; i < sectionsClone.length; i++) {
-        let section: SectionI = sectionsClone[i]
-        if (section.id == sectionId) {
-          section.cards.push({
-            id: response.data.id,
-            title: response.data.title,
-            section_id: sectionId
-          })
-          setSections(sectionsClone)
-        }
-      }
-    })
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination, draggableId } = result
+    if (!destination?.droppableId || destination?.droppableId === source.droppableId) return
+    moveCardToSection(Number(destination?.droppableId), Number(draggableId))
   }
 
   return (
     <BoardContainer>
-      {sections.map((section: SectionI) => {
-        return <Section section={section} onCardSubmit={onCardSubmit}></Section>
-      })}
+      <DragDropContext onDragEnd={onDragEnd}>
+        {sections.map((section: SectionI) => {
+          return (
+            <Droppable key={section.id} droppableId={String(section.id)}>
+              {(provided) => (
+                <Section
+                  section={section}
+                  onCardSubmit={addNewCardToSection}
+                  innerRef={provided.innerRef}
+                  {...provided.droppableProps}
+                >
+                  {provided.placeholder}
+                </Section>
+              )}
+            </Droppable>
+          )
+        })}
+      </DragDropContext>
     </BoardContainer>
   )
 }

@@ -35,10 +35,11 @@ export const SectionTitle = styled.span`
 
 export const CardsContainer = styled.div`
   flex: 1;
-  overflow-y: auto;
-  align-self: center;
+  align-self: center; 
   max-height: 90vh;
   margin-top: 10px;
+  width: 100%;
+  min-height: 24px;
   flex-direction: column;
   justify-content: space-between;
 `
