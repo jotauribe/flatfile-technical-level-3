@@ -39,11 +39,20 @@ describe('CardsController', () => {
     expect(controller).toBeDefined()
   })
 
-  it('should call save on cards repository', async () => {
+  it('should call save on cards service', async () => {
     const card = new CardEntity()
     card.title = 'test'
     card.sectionId = 1
     jest.spyOn(service, 'create').mockImplementation(() => Promise.resolve(card))
     expect(await controller.addCard({ sectionId: 1, title: 'test' })).toBe(card)
+  })
+
+  it('should call update on cards service', async () => {
+    const card = { id: 1, sectionId: 1, title: 'test' } as CardEntity
+    jest.spyOn(service, 'update').mockImplementation(() => Promise.resolve(card))
+    const result = await controller.updateCard({ id: 1, sectionId: 1, title: 'test' })
+
+    expect(result).toBe(card)
+    expect(service.update).toBeCalledWith(card)
   })
 })

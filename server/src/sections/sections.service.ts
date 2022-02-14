@@ -10,7 +10,11 @@ export class SectionsService {
     private sectionsRepository: Repository<SectionEntity>
   ) {}
 
-  findAll(): Promise<SectionEntity[]> {
-    return this.sectionsRepository.find({ relations: ['cards'] })
+  async findAll(): Promise<SectionEntity[]> {
+    const sections = await this.sectionsRepository.find({ relations: ['cards', 'cards.subtasks'] })
+    return sections.map((section) => {
+      const cardsWithoutParent = section.cards.filter((card) => !card.parentId)
+      return { ...section, cards: cardsWithoutParent }
+    })
   }
 }
