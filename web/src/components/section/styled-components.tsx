@@ -13,7 +13,6 @@ export const WrappedSection = styled.section`
   border-radius: 3px;
   margin: 5px 5px;
   padding: 8px;
-  position: relative;
   display: inline-flex;
   height: auto;
   max-height: 90%;

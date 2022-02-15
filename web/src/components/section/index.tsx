@@ -58,7 +58,14 @@ const Section: React.FC<SectionProps> = ({
           {!!cards?.length &&
             cards.map((card: CardI) => {
               return (
-                <Card draggable key={card.id} role='listitem' card={card} onDrop={onDropInCard} />
+                <Card
+                  draggable
+                  key={card.id}
+                  role='listitem'
+                  card={card}
+                  section={section}
+                  onDrop={onDropInCard}
+                />
               )
             })}
         </CardsContainer>
