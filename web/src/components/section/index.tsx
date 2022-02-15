@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
-import { Draggable } from 'react-beautiful-dnd'
+import { useDrop } from 'react-dnd'
+import { IoIosAdd } from 'react-icons/io'
 
 import Card from '../card'
 import SectionI from '../../types/section'
 
 import {
-  AddCardButtonDiv,
-  AddCardButtonSpan,
+  AddCardButtonButton,
   CardComposerDiv,
   CardsContainer,
   ListCardComponent,
@@ -21,46 +21,46 @@ import {
 } from './styled-components'
 import CardI from '../../types/card'
 
-type SectionProps = {
+export type SectionProps = React.HTMLAttributes<HTMLDivElement> & {
   section: SectionI
+  onDropInCard: Function
+  onDropInSection: Function
   onCardSubmit: Function
-  innerRef: (element: HTMLElement | null) => any
 }
 
 const Section: React.FC<SectionProps> = ({
-  children, 
-  innerRef,
-  section: { id, title, cards },
-  onCardSubmit,
-  ...droppableProps
+  section,
+  onDropInCard,
+  onDropInSection,
+  onCardSubmit
 }) => {
   const [isTempCardActive, setIsTempCardActive] = useState(false)
   const [cardText, setCardText] = useState('')
+  const { id, title, cards = [] } = section
+  const [, drop] = useDrop(
+    () => ({
+      accept: 'CARD',
+      drop: (card, monitor) => (!monitor.didDrop() ? onDropInSection(card, section) : undefined)
+    }),
+    [section, onDropInSection]
+  )
 
   return (
-    <Wrapper className='section-root-wrapper'>
+    <Wrapper ref={drop} className='section-root-wrapper' data-testid='section'>
       <WrappedSection className='section-wrapper'>
-        <SectionHeader className='section-header'>
+        <SectionHeader id={`section-header-${section.id}`} className='section-header'>
           <SectionTitle>{title}</SectionTitle>
         </SectionHeader>
-        <CardsContainer ref={innerRef} {...droppableProps} className='section-card-container'>
-          {cards?.length &&
-            cards.map((card: CardI, index: number) => {
+        <CardsContainer
+          className='section-card-container'
+          aria-labelledby={`section-header-${section.id}`}
+        >
+          {!!cards?.length &&
+            cards.map((card: CardI) => {
               return (
-                <Draggable key={card.id} index={index} draggableId={String(card.id)}>
-                  {(provided) => (
-                    <Card
-                      key={card.id}
-                      card={card}
-                      innerRef={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    ></Card>
-                  )}
-                </Draggable>
+                <Card draggable key={card.id} role='listitem' card={card} onDrop={onDropInCard} />
               )
             })}
-            {children}
         </CardsContainer>
         {isTempCardActive ? (
           <CardComposerDiv>
@@ -91,9 +91,10 @@ const Section: React.FC<SectionProps> = ({
             </SubmitCardButtonDiv>
           </CardComposerDiv>
         ) : (
-          <AddCardButtonDiv onClick={() => setIsTempCardActive(true)}>
-            <AddCardButtonSpan>Add another card</AddCardButtonSpan>
-          </AddCardButtonDiv>
+          <AddCardButtonButton onClick={() => setIsTempCardActive(true)}>
+            <IoIosAdd size={20} color='rgb(107, 119, 140)' />
+            Add another card
+          </AddCardButtonButton>
         )}
       </WrappedSection>
     </Wrapper>

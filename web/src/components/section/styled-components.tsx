@@ -12,7 +12,7 @@ export const WrappedSection = styled.section`
   background-color: #e3e3e3;
   border-radius: 3px;
   margin: 5px 5px;
-  padding: 10px;
+  padding: 8px;
   position: relative;
   display: inline-flex;
   height: auto;
@@ -22,32 +22,44 @@ export const WrappedSection = styled.section`
 
 export const SectionHeader = styled.header`
   display: flex;
+  padding: 2px 8px 10px 8px;
   flex-direction: row;
 `
 
-export const SectionTitle = styled.span`
+export const SectionTitle = styled.h1`
+  margin: 0;
   font-weight: bold;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 18px;
   cursor: grab;
   width: 70%;
 `
 
-export const CardsContainer = styled.div`
+export const CardsContainer = styled.ul`
   flex: 1;
   align-self: center; 
   max-height: 90vh;
-  margin-top: 10px;
+  margin: 0;
+  padding: 0;
   width: 100%;
-  min-height: 24px;
   flex-direction: column;
   justify-content: space-between;
+
+  & > * {
+    margin-bottom: 8px;
+    list-style-type: none;
+  }
 `
 
-export const AddCardButtonDiv = styled.div`
-  min-height: 24px;
-  max-height: 24px;
+export const AddCardButtonButton = styled.button`
+  display: flex;
+  align-items: center;
+  border: none;
   cursor: pointer;
+  background-color: transparent;
+  text-align: left;
+  font-size: 14px;
+  padding: 4px;
   :hover {
     background-color: rgba(9, 30, 66, 0.08);
     color: #172b4d;

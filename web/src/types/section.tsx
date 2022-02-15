@@ -5,3 +5,5 @@ export default interface SectionI {
   title: string
   cards: CardI[]
 }
+
+export type NormalizedSection = Omit<SectionI, 'cards'> & { cards: number[] }

@@ -1,9 +1,9 @@
 import { indexBy } from '../../utils'
-import CardI from '../../types/card'
-import SectionI from '../../types/section'
+import CardI, { NormalizedCard } from '../../types/card'
+import SectionI, { NormalizedSection } from '../../types/section'
 
-type NormalizedSection = Omit<SectionI, 'cards'> & { cards: number[] }
 export type NormalizedData<T> = { byId: Record<number, T>; allIds: number[] }
+export type CardsMap = Record<CardI['id'], NormalizedCard>
 export type NormalizerResult = {
   cards: NormalizedData<CardI>
   sections: NormalizedData<NormalizedSection>

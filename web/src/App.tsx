@@ -1,12 +1,13 @@
-import React from 'react'
 import styled from 'styled-components'
-import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd'
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 
 import Section from './components/section'
 import SectionI from './types/section'
+import CardI from './types/card'
+import useSections from './hooks/useSections'
 
 import './App.css'
-import useSections from './hooks/useSections'
 
 export const BoardContainer = styled.div`
   background-color: rgb(49, 121, 186);
@@ -23,35 +24,34 @@ export const BoardContainer = styled.div`
 `
 
 function App() {
-  const { sections, moveCardToSection, addNewCardToSection } = useSections()
+  const { sections, moveCardToSection, addNewCardToSection, addSubtaskToCard } = useSections()
 
-  const onDragEnd = (result: DropResult) => {
-    const { source, destination, draggableId } = result
-    if (!destination?.droppableId || destination?.droppableId === source.droppableId) return
-    moveCardToSection(Number(destination?.droppableId), Number(draggableId))
+  const moveToSection = (card: CardI, destination: SectionI) => {
+    if (destination?.id === card.sectionId) return
+    moveCardToSection(destination.id, card)
+  }
+
+  const moveToCard = (parentCardId: number, card: CardI) => {
+    if (parentCardId === card.parentId || parentCardId === card.id) return
+    addSubtaskToCard(parentCardId, card)
   }
 
   return (
-    <BoardContainer>
-      <DragDropContext onDragEnd={onDragEnd}>
+    <DndProvider backend={HTML5Backend}>
+      <BoardContainer>
         {sections.map((section: SectionI) => {
           return (
-            <Droppable key={section.id} droppableId={String(section.id)}>
-              {(provided) => (
-                <Section
-                  section={section}
-                  onCardSubmit={addNewCardToSection}
-                  innerRef={provided.innerRef}
-                  {...provided.droppableProps}
-                >
-                  {provided.placeholder}
-                </Section>
-              )}
-            </Droppable>
+            <Section
+              key={section.id}
+              section={section}
+              onDropInCard={moveToCard}
+              onDropInSection={moveToSection}
+              onCardSubmit={addNewCardToSection}
+            ></Section>
           )
         })}
-      </DragDropContext>
-    </BoardContainer>
+      </BoardContainer>
+    </DndProvider>
   )
 }
 
