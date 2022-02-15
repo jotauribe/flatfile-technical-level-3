@@ -38,4 +38,11 @@ describe('SectionController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined()
   })
+
+  it('should return all sections', async () => {
+    const allSections = [{ id: 1, title: 'section', cards: [] }]
+    jest.spyOn(service, 'findAll').mockReturnValueOnce(Promise.resolve(allSections))
+    expect(await controller.getAllSections()).toEqual(allSections)
+    expect(service.findAll).toBeCalledWith()
+  })
 })

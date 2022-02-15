@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
+import { useDrop } from 'react-dnd'
+import { IoIosAdd } from 'react-icons/io'
 
 import Card from '../card'
 import SectionI from '../../types/section'
 
 import {
-  AddCardButtonDiv,
-  AddCardButtonSpan,
+  AddCardButtonButton,
   CardComposerDiv,
   CardsContainer,
   ListCardComponent,
@@ -20,26 +21,52 @@ import {
 } from './styled-components'
 import CardI from '../../types/card'
 
-const Section = ({
-  section: { id, title, cards },
-  onCardSubmit
-}: {
+export type SectionProps = React.HTMLAttributes<HTMLDivElement> & {
   section: SectionI
+  onDropInCard: Function
+  onDropInSection: Function
   onCardSubmit: Function
+}
+
+const Section: React.FC<SectionProps> = ({
+  section,
+  onDropInCard,
+  onDropInSection,
+  onCardSubmit
 }) => {
   const [isTempCardActive, setIsTempCardActive] = useState(false)
   const [cardText, setCardText] = useState('')
+  const { id, title, cards = [] } = section
+  const [, drop] = useDrop(
+    () => ({
+      accept: 'CARD',
+      drop: (card, monitor) => (!monitor.didDrop() ? onDropInSection(card, section) : undefined)
+    }),
+    [section, onDropInSection]
+  )
 
   return (
-    <Wrapper>
-      <WrappedSection>
-        <SectionHeader>
+    <Wrapper ref={drop} className='section-root-wrapper' data-testid='section'>
+      <WrappedSection className='section-wrapper'>
+        <SectionHeader id={`section-header-${section.id}`} className='section-header'>
           <SectionTitle>{title}</SectionTitle>
         </SectionHeader>
-        <CardsContainer>
-          {cards.length &&
+        <CardsContainer
+          className='section-card-container'
+          aria-labelledby={`section-header-${section.id}`}
+        >
+          {!!cards?.length &&
             cards.map((card: CardI) => {
-              return <Card key={card.id} card={card}></Card>
+              return (
+                <Card
+                  draggable
+                  key={card.id}
+                  role='listitem'
+                  card={card}
+                  section={section}
+                  onDrop={onDropInCard}
+                />
+              )
             })}
         </CardsContainer>
         {isTempCardActive ? (
@@ -71,9 +98,10 @@ const Section = ({
             </SubmitCardButtonDiv>
           </CardComposerDiv>
         ) : (
-          <AddCardButtonDiv onClick={() => setIsTempCardActive(true)}>
-            <AddCardButtonSpan>Add another card</AddCardButtonSpan>
-          </AddCardButtonDiv>
+          <AddCardButtonButton onClick={() => setIsTempCardActive(true)}>
+            <IoIosAdd size={20} color='rgb(107, 119, 140)' />
+            Add another card
+          </AddCardButtonButton>
         )}
       </WrappedSection>
     </Wrapper>

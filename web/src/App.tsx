@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import axios from 'axios'
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 
 import Section from './components/section'
 import SectionI from './types/section'
+import CardI from './types/card'
+import useSections from './hooks/useSections'
 
 import './App.css'
 
@@ -22,43 +24,34 @@ export const BoardContainer = styled.div`
 `
 
 function App() {
-  const [sections, setSections] = useState<SectionI[]>([])
+  const { sections, moveCardToSection, addNewCardToSection, addSubtaskToCard } = useSections()
 
-  useEffect(() => {
-    axios.get('http://localhost:3001/sections').then((response) => {
-      // Section order is determined by ID so sort by ID
-      const sortedSections = response.data.sort((a: SectionI, b: SectionI) => a.id - b.id)
-      setSections(sortedSections)
-    })
-  })
+  const moveToSection = (card: CardI, destination: SectionI) => {
+    if (destination?.id === card.sectionId) return
+    moveCardToSection(destination.id, card)
+  }
 
-  const onCardSubmit = (sectionId: number, title: string) => {
-    axios({
-      method: 'post',
-      url: 'http://localhost:3001/cards',
-      data: { sectionId, title }
-    }).then((response) => {
-      let sectionsClone: SectionI[] = [...sections]
-      for (let i = 0; i < sectionsClone.length; i++) {
-        let section: SectionI = sectionsClone[i]
-        if (section.id == sectionId) {
-          section.cards.push({
-            id: response.data.id,
-            title: response.data.title,
-            section_id: sectionId
-          })
-          setSections(sectionsClone)
-        }
-      }
-    })
+  const moveToCard = (parentCardId: number, card: CardI) => {
+    if (parentCardId === card.parentId || parentCardId === card.id) return
+    addSubtaskToCard(parentCardId, card)
   }
 
   return (
-    <BoardContainer>
-      {sections.map((section: SectionI) => {
-        return <Section section={section} onCardSubmit={onCardSubmit}></Section>
-      })}
-    </BoardContainer>
+    <DndProvider backend={HTML5Backend}>
+      <BoardContainer>
+        {sections.map((section: SectionI) => {
+          return (
+            <Section
+              key={section.id}
+              section={section}
+              onDropInCard={moveToCard}
+              onDropInSection={moveToSection}
+              onCardSubmit={addNewCardToSection}
+            ></Section>
+          )
+        })}
+      </BoardContainer>
+    </DndProvider>
   )
 }
 

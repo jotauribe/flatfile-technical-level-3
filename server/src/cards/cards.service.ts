@@ -10,10 +10,19 @@ export class CardsService {
     private cardsRepository: Repository<CardEntity>
   ) {}
 
-  create({ sectionId, title }: { sectionId: number; title: string }): Promise<CardEntity> {
-    let card = new CardEntity()
+  create({ sectionId, title }: Partial<CardEntity>): Promise<CardEntity> {
+    const card = new CardEntity()
     card.title = title
-    card.section_id = sectionId
+    card.sectionId = sectionId
+    return this.cardsRepository.save(card)
+  }
+
+  async update({ id, parentId, sectionId, title, subtasks }: Partial<CardEntity>): Promise<CardEntity> {
+    const card = await this.cardsRepository.findOne(id)
+    card.title = title || card.title
+    card.sectionId = sectionId || card.sectionId
+    card.parentId = parentId || card.parentId
+    card.subtasks = subtasks || card.subtasks
     return this.cardsRepository.save(card)
   }
 }
